@@ -1,9 +1,10 @@
 # xpeedo
-Simple UDP Shell for Apache2 (LINUX).
+Simple UDP Shell for Apache2 (LINUX/UNIX).
 
 This is a simple UDP Shell for Apache2
 Minimum Requirements:
 OS: Linux
+Supported OS: Ubuntu, RedHat, CentOS, etc.
 PERL: Yes, 5.3
 PHP: Yes, 5.0+
 Apache2: Yes
