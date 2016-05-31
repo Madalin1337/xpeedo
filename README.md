@@ -14,6 +14,6 @@ RAM: 1GB+;
 
 # Installation:
 Place shell.php & your DDoS script in /var/www/html (for beginners); 
-If you don't have a DDoS script, download this: https://xpeedo.xyz/downloads/trex.pl
+If you don't have a DDoS script, download this: https://xpeedo.xyz/downloads/trex
 
 # DISACLAIMER: The coder isn't responsible for the damage made by you or other culprits.
