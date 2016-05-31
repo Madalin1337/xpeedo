@@ -1,5 +1,5 @@
-# xpeedo
-Simple UDP Shell for Apache2 (LINUX/UNIX).
+# Coded by Xpeedo
+# Simple UDP Shell for Apache2 (LINUX/UNIX).
 
 This is a simple UDP Shell for Apache2
 Minimum Requirements:
