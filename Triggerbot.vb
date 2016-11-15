@@ -1,9 +1,9 @@
-'
-' IT'S JUST A SIMPLE TRIGGERBOT CODED IN VB.NET
-' MOST OF ALL COMMENTS ARE IN ROMANIAN, JUST IGNORE IT
-'
-
 Public Class Form1
+
+    Public Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Long, ByVal dx As Long, ByVal dy As Long, ByVal dwData As Long, ByVal dwExtraInfo As Long)
+
+    Const MOUSEEVENTF_LEFTDOWN = &H2
+    Const MOUSEEVENTF_LEFTUP = &H4
 
     '=====================================================================================================================================
     '|       ADDRESS       |       DEFAULT VALUE AS HEXADECIMAL BYTE ARRAY        |        CHANGED VALUE AS HEXADECIMAL BYTE ARRAY       |
@@ -34,6 +34,13 @@ Public Class Form1
     Dim checkingcar = "0"
     Dim shotstatus = "0"
     Dim pped = "0"
+    Dim wId = "0"
+    Dim deagleclip = "0"
+    Dim m4clip = "0"
+    Dim xaxis = "0"
+    Dim yaxis = "0.0015"
+    Dim fastconnect = "3000"
+    Dim wallhack = "OFF"
 
     Declare Sub Sleep Lib "kernel32" (ByVal milliseconds As Integer)
 
@@ -112,7 +119,15 @@ Public Class Form1
                 "Weapon Slot: " + slotweapon + vbNewLine + _
                 "Checkcar: " + checkingcar + vbNewLine + _
                 "Shoot: " + shotstatus + vbNewLine + _
-                "Target: " + pped
+                "Target: " + pped + vbNewLine + _
+                "Weapon ID: " + wId.ToString + vbNewLine + _
+                "Deagle Clip: " + deagleclip.ToString + vbNewLine + _
+                "M4 Clip: " + m4clip.ToString + vbNewLine + _
+                "X Axis: " + xaxis.ToString + vbNewLine + _
+                "Y Axis: " + yaxis.ToString + vbNewLine + _
+                "FastConnect: " + fastconnect.ToString + vbNewLine + _
+                "WallHack: " + wallhack.ToString
+
         Else
             Label1.Text = "Debug Mode:"
         End If
@@ -160,9 +175,11 @@ Public Class Form1
                             ' 32768 = Doar Click Dreapta
                             ' 32896 = Click stanga + Click dreapta
 
-                            WriteLong(proc, BaseInput + "&H2FE8C", Value:=32896, nsize:=4)
+                            'WriteLong(proc, BaseInput + "&H2FE8C", Value:=32896, nsize:=4)
+                            mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
                             Sleep(10)
-                            WriteLong(proc, BaseInput + "&H2FE8C", Value:=32768, nsize:=4)
+                            mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+                            'WriteLong(proc, BaseInput + "&H2FE8C", Value:=32768, nsize:=4)
                             Sleep(1)
                             WriteDMALong(proc, "&HB6F5F0", Offsets:={&H79C}, Value:=0, Level:=1, nsize:=4)
                         End If
@@ -178,6 +195,133 @@ Public Class Form1
 
             End Try
         End If
+
+        '
+        ' ADVANCED NO RELOAD
+        '
+        ' IN CE CONSTA? SIMPLU:
+        ' ATUNCI CAND TRAGI SI AI RAMAS LA ULTIMUL GLONT SE REINCARCA CARTUSUL AUTOMAT LA 7
+        ' ACEST COD VA APLICA TREABA ASTA DOAR LA DEAGLE SI M4, BINEINTELES MERGE SI LA ARTA ARMA, GEN MP5 SAU TEC
+        '
+
+        If CheckBox4.Checked = True Then
+
+            ' AVEM URMATOARELE ADRESE:
+            ' BAA410 => Verifica ce arma detii in mana (respectiv id-ul armei, in cazul nostru vrem advanced no reload pentru deagle si m4)
+            ' B6F5F0 => CPED
+            ' 5E0 => OFFSET CLIP DEAGLE
+            ' 634 => OFFSET CLIP M4
+            Try
+                wId = ReadLong(proc, "&HBAA410", nsize:=4)
+                deagleclip = ReadDMALong(proc, "&HB6F5F0", Offsets:={&H5E0}, Level:=1, nsize:=4)
+                m4clip = ReadDMALong(proc, "&HB6F5F0", Offsets:={&H634}, Level:=1, nsize:=4)
+
+                If wId = 24 Then
+                    If deagleclip <= 6 Then
+                        WriteDMALong(proc, "&HB6F5F0", Offsets:={&H5E0}, Value:=deagleclip + 1, Level:=1, nsize:=4)
+                    End If
+                ElseIf wId = 31 Then
+                    If m4clip <= 49 Then
+                        WriteDMALong(proc, "&HB6F5F0", Offsets:={&H634}, Value:=m4clip + 1, Level:=1, nsize:=4)
+                    End If
+                End If
+            Catch Ex As Exception
+            End Try
+        End If
+
+        '
+        ' MOUSEFIX, CEL MAU USOR EVER "CIT" DE FACUT, DOAR VA ARAT xD
+        ' AVEM URMATOARELE ADRESE: AXA X, RESPECTIV AXA Y
+        ' AXA Y NU POATE FI MODIFICATA DIN JOC, DAR SCOPUL NOSTRU ESTE DE A
+        ' EGALA AXA X (Sensivitatea din optiuni) cu axa Y
+        ' AXA X: B6EC1C
+        ' AXA Y: B6EC18
+        '
+
+        If CheckBox5.Checked = True Then
+            Try
+                xaxis = ReadFloat(proc, "&HB6EC1C", nsize:=4)
+                yaxis = ReadFloat(proc, "&HB6EC18", nsize:=4)
+                If xaxis <> yaxis Then
+                    'Egalarea
+                    WriteFloat(proc, "&HB6EC18", Value:=xaxis, nsize:=4)
+                End If
+            Catch ex As Exception
+
+            End Try
+        Else
+            Try
+                If yaxis <> "0.0015" Then 'aici ar putea fi o problema, dar in fine.
+                    yaxis = "0.0015"
+                    WriteFloat(proc, "&HB6EC18", Value:=0.0015, nsize:=4)
+                End If
+            Catch ex As Exception
+
+            End Try
+        End If
+
+        '
+        ' FASTCONNECT
+        ' // FARA CHEAT ENGINE PLS
+        ' 3000 = delay normal de conectare
+        ' 0 = fast connect (fara delay)
+        ' ADRESA: samp.dll + 2D3C45
+        '
+
+            If CheckBox6.Checked = True Then
+            Try
+                Dim sampADDR = GetModuleBaseAddress(proc, "samp.dll")
+                fastconnect = ReadLong(proc, sampADDR + "&H2D3C45", nsize:=4)
+                If fastconnect <> 0 Then
+                    fastconnect = "0"
+                    WriteLong(proc, sampADDR + "&H2D3C45", Value:=0, nsize:=4)
+                End If
+            Catch ex As Exception
+            End Try
+            Else
+            Try
+                Dim sampADDR = GetModuleBaseAddress(proc, "samp.dll")
+                fastconnect = ReadLong(proc, sampADDR + "&H2D3C45", nsize:=4)
+                If fastconnect <> 3000 Then
+                    fastconnect = "3000"
+                    WriteLong(proc, sampADDR + "&H2D3C45", Value:=3000, nsize:=4)
+                End If
+            Catch ex As Exception
+            End Try
+            End If
+
+        '
+        ' WALLHACK - SOURCE CODE WAS STOLEN FROM CHEATSTW
+        '
+
+        If CheckBox7.Checked = True Then
+            Try
+                Dim sampADDR = GetModuleBaseAddress(proc, "samp.dll")
+                Dim distance = ReadDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H27}, Level:=2, nsize:=4)
+                Dim calutulauriu = ReadDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H2F}, Level:=2, nsize:=4)
+                If calutulauriu <> 512 Then
+                    WriteDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H27}, Value:=1203982336, Level:=2, nsize:=4)
+                    WriteDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H2F}, Value:=512, Level:=2, nsize:=4)
+                    wallhack = "ON"
+                End If
+
+            Catch ex As Exception
+            End Try
+        Else
+            Try
+                Dim sampADDR = GetModuleBaseAddress(proc, "samp.dll")
+                Dim distance = ReadDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H27}, Level:=2, nsize:=4)
+                Dim calutulauriu = ReadDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H2F}, Level:=2, nsize:=4)
+                If calutulauriu <> 513 Then
+                    WriteDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H27}, Value:=1112014848, Level:=2, nsize:=4)
+                    WriteDMALong(proc, sampADDR + &H21A0F8, Offsets:={&H3C5, &H2F}, Value:=513, Level:=2, nsize:=4)
+                    wallhack = "OFF"
+                    End If
+
+            Catch ex As Exception
+            End Try
+        End If
+
     End Sub
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
