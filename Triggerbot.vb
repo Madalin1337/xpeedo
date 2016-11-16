@@ -41,6 +41,10 @@ Public Class Form1
     Dim yaxis = "0.0015"
     Dim fastconnect = "3000"
     Dim wallhack = "OFF"
+    Dim semi = "0"
+    Dim rotation = "0"
+    Dim slapkey = "0"
+    Dim slap = "0"
 
     Declare Sub Sleep Lib "kernel32" (ByVal milliseconds As Integer)
 
@@ -126,7 +130,11 @@ Public Class Form1
                 "X Axis: " + xaxis.ToString + vbNewLine + _
                 "Y Axis: " + yaxis.ToString + vbNewLine + _
                 "FastConnect: " + fastconnect.ToString + vbNewLine + _
-                "WallHack: " + wallhack.ToString
+                "WallHack: " + wallhack.ToString + vbNewLine + _
+                "Recoil: " + semi.ToString + vbNewLine + _
+                "Rotation: " + rotation.ToString + vbNewLine + _
+                "Slap Key: " + slapkey.ToString + vbNewLine + _
+                "Slap: " + slap.ToString
 
         Else
             Label1.Text = "Debug Mode:"
@@ -163,7 +171,7 @@ Public Class Form1
                         slot = 6236162 Or _
                         slot = 6236163 Or _
                         slot = 6236164 Or _
-                        slot = 6236165 Or _
+                        CheckBox10.Checked = True Or _
                         slot = 6236166 Or _
                         slot = 6236167 Then
                         If checkcar = 0 Then
@@ -322,6 +330,62 @@ Public Class Form1
             End Try
         End If
 
+        '
+        ' SEMI NO RECOIL
+        ' ADDRESS: B7CDC8
+        ' SET VAL: 1.074754357
+        '
+
+        If CheckBox8.Checked = True Then
+            Try
+                semi = ReadFloat(proc, "&HB7CDC8", nsize:=4)
+                If semi >= 1.074754357 Then
+                    WriteFloat(proc, "&HB7CDC8", Value:=0, nsize:=4)
+                End If
+            Catch ex As Exception
+
+            End Try
+        End If
+
+        '
+        ' ROTATION
+        ' ADDRESS: B6F5F0 + 560 AS POINTER
+        '
+        If CheckBox9.Checked = True Then
+            Try
+                rotation = ReadDMALong(proc, "&HB6F5F0", Offsets:={&H560}, Level:=1, nsize:=4)
+                If rotation <> 1103626240 Then
+                    WriteDMALong(proc, "&HB6F5F0", Offsets:={&H560}, Value:=1103626240, Level:=1, nsize:=4)
+                End If
+            Catch ex As Exception
+
+            End Try
+        End If
+
+        '
+        ' SLAP
+        ' ACTIVATION: F10
+        ' PRESS TYPE: ONCE
+        ' ADDRESS FOR F10: BA6768 | 257 = off & 1 = on
+        ' ADDRESS FOR Z POS: B6F5F0 + 14 + 38 AS POINTER
+        ' 1084856730 for 5.3
+        '
+
+        If CheckBox11.Checked = True Then
+            slap = ReadDMALong(proc, "&HB6F5F0", Offsets:={&H14, &H38}, Level:=2, nsize:=4)
+            slapkey = ReadLong(proc, "&HBA6768", nsize:=4)
+            Const add = 1084856730
+            Try
+                If slapkey = 1 Then
+                    WriteDMALong(proc, "&HB6F5F0", Offsets:={&H14, &H38}, Value:=slap + 4000000, Level:=2, nsize:=4)
+                    Sleep(10)
+                    WriteLong(proc, "&HBA6768", Value:=257, nsize:=4)
+                End If
+            Catch ex As Exception
+
+            End Try
+
+        End If
     End Sub
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
