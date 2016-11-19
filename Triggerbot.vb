@@ -45,6 +45,9 @@ Public Class Form1
     Dim rotation = "0"
     Dim slapkey = "0"
     Dim slap = "0"
+    Dim onfoot = "40"
+    Dim incar = "40"
+    Dim aimdata = "40"
 
     Declare Sub Sleep Lib "kernel32" (ByVal milliseconds As Integer)
 
@@ -86,7 +89,7 @@ Public Class Form1
 
     Private Sub Timer1_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Timer1.Tick
         Try
-            If disabled <> "Already Disabled or Not Disabled" Then
+            If disabled <> "Yes" Or disabled <> "Already Disabled" Then
                 disableAntiCheat()
             End If
         Catch ex As Exception
@@ -134,7 +137,11 @@ Public Class Form1
                 "Recoil: " + semi.ToString + vbNewLine + _
                 "Rotation: " + rotation.ToString + vbNewLine + _
                 "Slap Key: " + slapkey.ToString + vbNewLine + _
-                "Slap: " + slap.ToString
+                "Slap: " + slap.ToString + vbNewLine + _
+                "OnFoot: " + onfoot.ToString + vbNewLine + _
+                "InCar: " + incar.ToString + vbNewLine + _
+                "AimData: " + aimdata.ToString
+
 
         Else
             Label1.Text = "Debug Mode:"
@@ -395,6 +402,30 @@ Public Class Form1
 
     Private Sub Button2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button2.Click
         MsgBox("Goodule, vezi sa nu iei sursa codului si sa zici ca e facut de tine, ok?" + vbNewLine + "Apropo, e free.", MsgBoxStyle.OkOnly, "About")
+    End Sub
+
+    Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Try
+
+            Dim SampADDR = GetModuleBaseAddress(proc, "samp.dll")
+
+            If CheckBox12.Checked = True Then 'onfoot
+                WriteLong(proc, SampADDR + "&HEC0A8", Value:=NumericUpDown1.Value, nsize:=4)
+            End If
+
+            If CheckBox13.Checked = True Then 'incar
+                WriteLong(proc, SampADDR + "&HEC0AC", Value:=NumericUpDown1.Value, nsize:=4)
+            End If
+
+            If CheckBox14.Checked = True Then 'aimdata
+                WriteLong(proc, SampADDR + "&HEC0B0", Value:=NumericUpDown1.Value, nsize:=4)
+            End If
+            onfoot = ReadLong(proc, SampADDR + "&HEC0A8", nsize:=4)
+            incar = ReadLong(proc, SampADDR + "&HEC0AC", nsize:=4)
+            aimdata = ReadLong(proc, SampADDR + "&HEC0B0", nsize:=4)
+        Catch ex As Exception
+
+        End Try
     End Sub
 End Class
 
