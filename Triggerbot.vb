@@ -48,6 +48,13 @@ Public Class Form1
     Dim onfoot = "40"
     Dim incar = "40"
     Dim aimdata = "40"
+    Dim xpos = "0"
+    Dim ypos = "0"
+    Dim zpos = "0"
+    Dim xmap = "0"
+    Dim ymap = "0"
+    Dim togglemap = "0"
+    Dim antistun = "0"
 
     Declare Sub Sleep Lib "kernel32" (ByVal milliseconds As Integer)
 
@@ -88,64 +95,6 @@ Public Class Form1
     End Sub
 
     Private Sub Timer1_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Timer1.Tick
-        Try
-            If disabled <> "Yes" Or disabled <> "Already Disabled" Then
-                disableAntiCheat()
-            End If
-        Catch ex As Exception
-        End Try
-
-
-        '
-        ' DISABLE PED RENDER
-        ' OFF = 1465445507
-        ' ON = 1469092035
-        '
-
-        Try
-            Dim pedrender = ReadLong(proc, "&H60BA80", nsize:=4)
-            If CheckBox1.Checked = True Then
-                If pedrender <> 1469092035 Then
-                    WriteLong(proc, "&H60BA80", Value:=1469092035, nsize:=4)
-                End If
-            Else
-                If pedrender <> 1465445507 Then
-                    WriteLong(proc, "&H60BA80", Value:=1465445507, nsize:=4)
-                End If
-            End If
-            renderped = pedrender.ToString
-        Catch Ex As Exception
-        End Try
-
-        If CheckBox3.Checked = True Then
-            Label1.Text = "Debug Mode:" + vbNewLine + _
-                "Disabled: " + disabled.ToString + vbNewLine + _
-                "First Address: " + firstcond.ToString + vbNewLine + _
-                "Second Address: " + secondcond.ToString + vbNewLine + _
-                "Ped Render: " + renderped + vbNewLine + _
-                "Weapon Slot: " + slotweapon + vbNewLine + _
-                "Checkcar: " + checkingcar + vbNewLine + _
-                "Shoot: " + shotstatus + vbNewLine + _
-                "Target: " + pped + vbNewLine + _
-                "Weapon ID: " + wId.ToString + vbNewLine + _
-                "Deagle Clip: " + deagleclip.ToString + vbNewLine + _
-                "M4 Clip: " + m4clip.ToString + vbNewLine + _
-                "X Axis: " + xaxis.ToString + vbNewLine + _
-                "Y Axis: " + yaxis.ToString + vbNewLine + _
-                "FastConnect: " + fastconnect.ToString + vbNewLine + _
-                "WallHack: " + wallhack.ToString + vbNewLine + _
-                "Recoil: " + semi.ToString + vbNewLine + _
-                "Rotation: " + rotation.ToString + vbNewLine + _
-                "Slap Key: " + slapkey.ToString + vbNewLine + _
-                "Slap: " + slap.ToString + vbNewLine + _
-                "OnFoot: " + onfoot.ToString + vbNewLine + _
-                "InCar: " + incar.ToString + vbNewLine + _
-                "AimData: " + aimdata.ToString
-
-
-        Else
-            Label1.Text = "Debug Mode:"
-        End If
 
         ' TRIGGERBOT
         ' URMATOARELE CONDITII:
@@ -242,6 +191,70 @@ Public Class Form1
                 End If
             Catch Ex As Exception
             End Try
+        End If
+
+        Try
+            If disabled <> "Yes" Or disabled <> "Already Disabled" Then
+                disableAntiCheat()
+            End If
+        Catch ex As Exception
+        End Try
+
+
+        '
+        ' DISABLE PED RENDER
+        ' OFF = 1465445507
+        ' ON = 1469092035
+        '
+
+        Try
+            Dim pedrender = ReadLong(proc, "&H60BA80", nsize:=4)
+            If CheckBox1.Checked = True Then
+                If pedrender <> 1469092035 Then
+                    WriteLong(proc, "&H60BA80", Value:=1469092035, nsize:=4)
+                End If
+            Else
+                If pedrender <> 1465445507 Then
+                    WriteLong(proc, "&H60BA80", Value:=1465445507, nsize:=4)
+                End If
+            End If
+            renderped = pedrender.ToString
+        Catch Ex As Exception
+        End Try
+
+        If CheckBox3.Checked = True Then
+            Label1.Text = "Debug Mode:" + vbNewLine + _
+                "Disabled: " + disabled.ToString + vbNewLine + _
+                "First Address: " + firstcond.ToString + vbNewLine + _
+                "Second Address: " + secondcond.ToString + vbNewLine + _
+                "Ped Render: " + renderped + vbNewLine + _
+                "Weapon Slot: " + slotweapon + vbNewLine + _
+                "Checkcar: " + checkingcar + vbNewLine + _
+                "Shoot: " + shotstatus + vbNewLine + _
+                "Target: " + pped + vbNewLine + _
+                "Weapon ID: " + wId.ToString + vbNewLine + _
+                "Deagle Clip: " + deagleclip.ToString + vbNewLine + _
+                "M4 Clip: " + m4clip.ToString + vbNewLine + _
+                "X Axis: " + xaxis.ToString + vbNewLine + _
+                "Y Axis: " + yaxis.ToString + vbNewLine + _
+                "FastConnect: " + fastconnect.ToString + vbNewLine + _
+                "WallHack: " + wallhack.ToString + vbNewLine + _
+                "Recoil: " + semi.ToString + vbNewLine + _
+                "Rotation: " + rotation.ToString + vbNewLine + _
+                "Slap Key: " + slapkey.ToString + vbNewLine + _
+                "Slap: " + slap.ToString + vbNewLine + _
+                "OnFoot: " + onfoot.ToString + vbNewLine + _
+                "InCar: " + incar.ToString + vbNewLine + _
+                "AimData: " + aimdata.ToString + vbNewLine + _
+                "XPOS: " + xpos.ToString + vbNewLine + _
+                "YPOS: " + ypos.ToString + vbNewLine + _
+                "XMAP: " + xmap.ToString + vbNewLine + _
+                "YMAP: " + ymap.ToString + vbNewLine + _
+                "ToggleMap: " + togglemap.ToString + vbNewLine + _
+                "Anti-Stun delay: " + antistun.ToString
+
+        Else
+            Label1.Text = "Debug Mode:"
         End If
 
         '
@@ -393,6 +406,35 @@ Public Class Form1
             End Try
 
         End If
+
+        '
+        ' TELEPORT PE MAPA
+        ' ADRESE:
+        ' xmap = BA67B8
+        ' ymap = BA67BC
+        ' xpos = B6F5F0 + 14 + 30 AS POINTER
+        ' ypos = B6F5F0 + 14 + 34 AS POINTER
+        ' ACUM AVEM NEVOIE DE UN TOGGLE, De exemplu un target
+        ' Vom folosi space ca sa ne teleportam pe mapa:
+        ' togglemap = BA6778
+        '
+
+        If CheckBox15.Checked = True Then
+            Try
+                xmap = ReadLong(proc, "&HBA67B8", nsize:=4)
+                ymap = ReadLong(proc, "&HBA67BC", nsize:=4)
+                xpos = ReadDMALong(proc, "&HB6F5F0", Offsets:={&H14, &H30}, Level:=2, nsize:=4)
+                ypos = ReadDMALong(proc, "&HB6F5F0", Offsets:={&H14, &H34}, Level:=2, nsize:=4)
+                togglemap = ReadLong(proc, "&HBA6778", nsize:=4)
+                If togglemap = 0 Then
+                    WriteDMALong(proc, "&HB6F5F0", Offsets:={&H14, &H30}, Value:=xmap, Level:=2, nsize:=4)
+                    Sleep(10)
+                    WriteDMALong(proc, "&HB6F5F0", Offsets:={&H14, &H34}, Value:=ymap, Level:=2, nsize:=4)
+                End If
+            Catch ex As Exception
+            End Try
+        End If
+
     End Sub
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
